@@ -11,8 +11,6 @@ def main():
     monitor.setup_db()
     parser = ap.ArgumentParser(description="POLARIS: Logistic System")
 
-
-
     parser.add_argument('--add', help="Add a new LGU", action="store_true")
     parser.add_argument('--cget', help="Get the most critical LGU", action="store_true")
     parser.add_argument('--list', help="List all the LGUs and Status", action="store_true")
