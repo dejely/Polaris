@@ -1,5 +1,5 @@
 # 🌟Polaris
-**_A Priority-Queue-Driven Crop Supply Monitoring Engine for Agricultural Logistics_**
+**_A Structured Redistribution Engine for Crop Supply Monitoring and Agricultural Logistics_**
 ## 📖 Overview
 POLARIS is an agricultural logistics system built to monitor the supply conditions of various crops across Local Government Units (LGUs).
 
