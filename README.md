@@ -1,2 +1,2 @@
 # Polaris
-Logistics and Supply Chain Management
+Logistics and Supply Chain Management using Priority Queues
