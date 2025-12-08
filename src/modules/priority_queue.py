@@ -26,12 +26,7 @@ class DLLPriorityQueue:
 
 			value = entry.value
 
-			if isinstance(value, tuple) and len(value) == 2:
-				crop, lgu = value
-			else:
-				crop, lgu = value, "Unknown" #set unknown if crop is not known
-
-			line = f"<LGU: {GREEN + BOLD + lgu + RESET}| Crop: {BOLD + crop} | Priority: {YELLOW + BOLD}{priority}{RESET}>"
+			line = f"<LGU: {GREEN + BOLD + value + RESET}| Priority: {YELLOW + BOLD}{priority}{RESET}>"
 			display.append(line)
 			node = node.get_next()
 			
@@ -140,15 +135,16 @@ class SortedPQ(DLLPriorityQueue):
 		self.size += 1
 
 	#new update
-	def remove_lgu(self, value):
+	def remove_from_pq(self, crop, _lgu):
+		#might have to go to supply_monitor
+		if crop is None:
+			return 
 		node = self.head_guard.get_next()
 
 
 		while node != self.tail_guard:
 			entry = node.get_item()
-			lgu_value, crop_value = entry.value
-
-			if lgu_value == value and crop_value == value: #tuple auto finds itself?
+			if entry.value == _lgu: #tuple auto finds itself?
 				#Unlinking
 				prev = node.get_prev()
 				next = node.get_next()
