@@ -8,7 +8,7 @@ BOLD = '\033[1m'
 
 def main():
     monitor = SupplyMonitor(use_sorted=True)
-    monitor.setup_db()
+
     parser = ap.ArgumentParser(description="POLARIS: Logistic System")
 
     parser.add_argument('--add', help="Add a new LGU", action="store_true")
@@ -35,11 +35,11 @@ def main():
         
     #list of entries 
     if args.list:
-        monitor.load_db()
+        
         monitor.show_pq()
     #gets most crit lgu
     if args.cget:        
-        monitor.load_db()
+        
         most = monitor.get_most_critical_LGU()
         if most is None:
             print("No LGUs in queue. Add Some?")

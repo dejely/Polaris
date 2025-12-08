@@ -131,11 +131,27 @@ class SortedPQ(DLLPriorityQueue):
 
 		self.size += 1
 
-	def extract_max(self):
-		pass
+	#new update
+	def remove_lgu(self, value):
+		node = self.head_guard.get_next()
 
 
+		while node != self.tail_guard:
+			entry = node.get_item()
+			if entry.value == value:
 
+				#Unlinking
+				prev = node.get_prev()
+				next = node.get_next()
+				prev.set_next(next)
+				next.set_prev(prev)
+
+				node.set_next(None)
+				node.set_prev(None)
+
+				self.size -= 1
+				return
+			node = node.get_next()
 
 	def remove_min(self):
 		if self.is_empty():

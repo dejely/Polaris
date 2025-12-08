@@ -11,6 +11,9 @@ class SupplyMonitor:
         else:
             self._pq = UnsortedPQ()
          #use sorted PQ or Unsorted
+
+        self.setup_db()
+        self.load_db()
         
     def setup_db(self):
         connection = sqlite3.connect(self.db_name)
@@ -19,7 +22,7 @@ class SupplyMonitor:
         _comm0 = """
                 CREATE TABLE IF NOT EXISTS
                 entries(
-                _lgu TEXT,
+                _lgu TEXT UNIQUE,
                 key INTEGER
                 )
                 """
@@ -58,8 +61,6 @@ class SupplyMonitor:
         ###
         ###
 
-
-
     def supply_checker(self, _lgu, curr_supply, ideal_supply):
         connection = sqlite3.connect(self.db_name)
         cur = connection.cursor()
@@ -68,20 +69,19 @@ class SupplyMonitor:
         key = -imbalance
 
         _comm0 = """
-                INSERT INTO entries(_lgu, key)
+                INSERT OR REPLACE INTO entries(_lgu, key)
                 VALUES(?, ?)
                 """
-        
-
-
 
         cur.execute(_comm0, (_lgu, key))
 
         connection.commit()
         connection.close()
 
-        #set this as basis of your Priority Queue
-        
+        #LGU UPDATE/DUPLICATE
+        self._pq.remove_lgu(_lgu)
+
+        #set this as basis of your Priority Queue 
         self._pq.insert(key, _lgu)
 
     def remove_max(self):
@@ -112,5 +112,3 @@ class SupplyMonitor:
             print(f"LGU: {row[0]}, Priority: {-row[1]}")  # invert key for display
 
         return summary
-    
-
