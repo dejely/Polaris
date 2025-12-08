@@ -417,4 +417,5 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
+*.db
 src/entries.db
