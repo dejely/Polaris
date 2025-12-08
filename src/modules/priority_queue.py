@@ -1,4 +1,4 @@
-from classes	import Entry, DLLNode
+from modules.dependency	import Entry, DLLNode
 
 class DLLPriorityQueue:
 	# DLL-based Priority Queue
@@ -105,6 +105,8 @@ class SortedPQ(DLLPriorityQueue):
 				current.set_prev(ins_node)
 				break
 
+		
+
 		if current == self.tail_guard: #case for when we loop to the most back of the list
 			#store orig last node
 			last = self.tail_guard.get_prev()
@@ -117,10 +119,17 @@ class SortedPQ(DLLPriorityQueue):
 
 		self.size += 1
 
+	def extract_max(self):
+		pass
+
+
+
+
 	def remove_min(self):
 		if self.is_empty():
 			raise Exception('Empty PQ: cannot remove min')
 		#store head/min
+		
 		min_node = self.head_guard.get_next()
 
 		#[head_guard] <-> [min] <-> [new min]
