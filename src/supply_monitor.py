@@ -40,7 +40,25 @@ class SupplyMonitor:
         
         connection.commit()
         connection.close()
+
+    def load_db(self):
+        connection = sqlite3.connect(self.db_name)
+        cur = connection.cursor()
     
+        ###
+        ### LOAD FROM DB 
+        
+        _comm1 = "SELECT _lgu, key FROM entries"
+        cur.execute(_comm1)
+        summary = cur.fetchall()
+        connection.close()
+
+        for _lgu, key in summary:
+            self._pq.insert(key, _lgu)
+        ###
+        ###
+
+
 
     def supply_checker(self, _lgu, curr_supply, ideal_supply):
         connection = sqlite3.connect(self.db_name)
@@ -53,6 +71,10 @@ class SupplyMonitor:
                 INSERT INTO entries(_lgu, key)
                 VALUES(?, ?)
                 """
+        
+
+
+
         cur.execute(_comm0, (_lgu, key))
 
         connection.commit()
@@ -80,8 +102,8 @@ class SupplyMonitor:
 
         cur.execute(_comm0)
         summary = cur.fetchall()
-        connection.close()
 
+        connection.close()
         print("Priority Queue (in memory):")
         print(self._pq)
 
@@ -90,4 +112,5 @@ class SupplyMonitor:
             print(f"LGU: {row[0]}, Priority: {-row[1]}")  # invert key for display
 
         return summary
+    
 
