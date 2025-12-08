@@ -419,3 +419,4 @@ FodyWeavers.xsd
 *.msp
 *.db
 src/entries.db
+*.db
