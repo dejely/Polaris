@@ -28,6 +28,7 @@ class SupplyMonitor:
         return self.remove_max() #removes highest priority
     
     def show_pq(self):
+        
         print(self._pq)
 
 

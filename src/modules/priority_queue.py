@@ -1,5 +1,11 @@
 from modules.dependency	import Entry, DLLNode
 
+RED = '\033[91m'
+GREEN = '\033[92m'
+YELLOW = '\033[93m'
+BOLD = '\033[1m'
+RESET = '\033[0m'
+
 class DLLPriorityQueue:
 	# DLL-based Priority Queue
 	def __init__(self):
@@ -15,10 +21,16 @@ class DLLPriorityQueue:
 		display = []
 		node = self.head_guard.get_next()
 		while node != self.tail_guard:
-			display.append(str(node.get_item()))
+			entry = node.get_item()
+			priority = -entry.key
+			line = f"<LGU: {GREEN + BOLD + entry.value + RESET} | Priority: {YELLOW + BOLD}{priority}{RESET}>"
+			display.append(line)
 			node = node.get_next()
+			
+
+
 		display = ', '.join(display)
-		display = '[' + display + ']'
+		display = '{' + display + '}'
 		return display
 
 	def is_empty(self):
