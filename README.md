@@ -99,3 +99,24 @@ Examples:
 ### PQ Priority:
 - Largest positive -> biggest oversupply -> biggest priority
 - Most negative -> biggest shortage -> lowest priority (unless changed)
+- 
+
+## Installation
+Clone the repository:
+```bash
+git clone https://github.com/dejely/Polaris.git
+cd src
+```
+No Dependencies Needed.
+
+## Usage
+➕ Add a new supply record
+```bash
+python main.py --add --lgu your_lgu --crop your_crop --curr 500 --ideal 300
+```
+📋 List all queues and database content
+```bash
+python main.py --list
+```
+
+# Contributing
