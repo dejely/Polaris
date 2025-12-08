@@ -23,7 +23,15 @@ class DLLPriorityQueue:
 		while node != self.tail_guard:
 			entry = node.get_item()
 			priority = -entry.key
-			line = f"<LGU: {GREEN + BOLD + entry.value + RESET} | Priority: {YELLOW + BOLD}{priority}{RESET}>"
+
+			value = entry.value
+
+			if isinstance(value, tuple) and len(value) == 2:
+				crop, lgu = value
+			else:
+				crop, lgu = value, "Unknown" #set unknown if crop is not known
+
+			line = f"<LGU: {GREEN + BOLD + lgu + RESET}| Crop: {BOLD + crop} | Priority: {YELLOW + BOLD}{priority}{RESET}>"
 			display.append(line)
 			node = node.get_next()
 			
@@ -138,8 +146,9 @@ class SortedPQ(DLLPriorityQueue):
 
 		while node != self.tail_guard:
 			entry = node.get_item()
-			if entry.value == value:
+			lgu_value, crop_value = entry.value
 
+			if lgu_value == value and crop_value == value: #tuple auto finds itself?
 				#Unlinking
 				prev = node.get_prev()
 				next = node.get_next()

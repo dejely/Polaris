@@ -15,9 +15,11 @@ def main():
     parser.add_argument('--cget', help="Get the most critical LGU", action="store_true")
     parser.add_argument('--list', help="List all the LGUs and Status", action="store_true")
     parser.add_argument('--flush', help="Fully resets your database", choices= ['true', 'false'])
+    
 
     #args for adding a LGU
     parser.add_argument('--lgu', help="Add LGU name", type = str)
+    parser.add_argument('--crop', help="Crop type", type=str)
     parser.add_argument('--curr', help="Add the current supply in the LGU", type = int)
     parser.add_argument('--ideal', help="Add the ideal supply in the LGU", type = int)
 
@@ -25,10 +27,10 @@ def main():
 
     #adds LGU
     if args.add:
-        if not (args.lgu and (args.curr is not None) and (args.ideal is not None)):
-            print("Error: Please Complete the format -> --lgu [lgu] --curr_supply[int] --ideal_supply[int]")
+        if not (args.lgu and args.crop and (args.curr is not None) and (args.ideal is not None)):
+            print("Error: Please Complete the format -> --lgu [lgu] --crop [crop] --curr_supply[int] --ideal_supply[int]")
             return
-        monitor.supply_checker(args.lgu, args.curr, args.ideal)
+        monitor.supply_checker(args.lgu, args.crop, args.curr, args.ideal)
         print(f"Added {RED + BOLD + args.lgu + RESET} successfully.")
 
 

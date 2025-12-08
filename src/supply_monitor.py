@@ -1,5 +1,10 @@
 from modules.priority_queue import SortedPQ, UnsortedPQ
 import sqlite3
+RED = '\033[91m'
+GREEN = '\033[92m'
+YELLOW = '\033[93m'
+BOLD = '\033[1m'
+RESET = '\033[0m'
 
 
 
@@ -23,6 +28,7 @@ class SupplyMonitor:
                 CREATE TABLE IF NOT EXISTS
                 entries(
                 _lgu TEXT UNIQUE,
+                crop TEXT,
                 key INTEGER
                 )
                 """
@@ -51,17 +57,17 @@ class SupplyMonitor:
         ###
         ### LOAD FROM DB 
         
-        _comm1 = "SELECT _lgu, key FROM entries"
+        _comm1 = "SELECT _lgu, crop, key FROM entries"
         cur.execute(_comm1)
         summary = cur.fetchall()
         connection.close()
 
-        for _lgu, key in summary:
-            self._pq.insert(key, _lgu)
+        for _lgu, crop, key in summary:
+            self._pq.insert(key, (crop, _lgu))
         ###
         ###
 
-    def supply_checker(self, _lgu, curr_supply, ideal_supply):
+    def supply_checker(self, _lgu, crop, curr_supply, ideal_supply):
         connection = sqlite3.connect(self.db_name)
         cur = connection.cursor()
 
@@ -69,11 +75,11 @@ class SupplyMonitor:
         key = -imbalance
 
         _comm0 = """
-                INSERT OR REPLACE INTO entries(_lgu, key)
-                VALUES(?, ?)
+                INSERT OR REPLACE INTO entries(_lgu, crop, key)
+                VALUES(?, ?, ?)
                 """
 
-        cur.execute(_comm0, (_lgu, key))
+        cur.execute(_comm0, (_lgu, crop, key))
 
         connection.commit()
         connection.close()
@@ -82,7 +88,7 @@ class SupplyMonitor:
         self._pq.remove_lgu(_lgu)
 
         #set this as basis of your Priority Queue 
-        self._pq.insert(key, _lgu)
+        self._pq.insert(key, (crop, _lgu)) #PQ ENTRY REPRESENTS: (<LGU>, <CROP>)
 
     def remove_max(self):
         return self._pq.remove_min()
@@ -98,7 +104,7 @@ class SupplyMonitor:
         cur = connection.cursor()
 
         # FIXED SQL
-        _comm0 = "SELECT _lgu, key FROM entries"
+        _comm0 = "SELECT _lgu, crop, key FROM entries"
 
         cur.execute(_comm0)
         summary = cur.fetchall()
@@ -109,6 +115,7 @@ class SupplyMonitor:
 
         print("\nDatabase Records:")
         for row in summary:
-            print(f"LGU: {row[0]}, Priority: {-row[1]}")  # invert key for display
+            lgu, crop, key = row
+            print(f"LGU: {GREEN + BOLD + lgu + RESET}, Crop: {BOLD + crop}, Priority: {YELLOW}{-key}{RESET}")  # invert key for display
 
         return summary
