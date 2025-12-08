@@ -7,7 +7,11 @@ BOLD = '\033[1m'
 
 
 def main():
+
+    
+
     monitor = SupplyMonitor(use_sorted=True)
+    monitor.setup_db()
     parser = ap.ArgumentParser(description="POLARIS: Logistic System")
 
     parser.add_argument('--add', help="Add a new LGU", action="store_true")
@@ -21,14 +25,16 @@ def main():
 
     args = parser.parse_args()
 
+    #adds LGU
     if args.add:
         if not (args.lgu and (args.curr is not None) and (args.ideal is not None)):
             print("Error: Please Complete the format -> --lgu [lgu] --curr_supply[int] --ideal_supply[int]")
             return
         
+    #list of entries 
     if args.list:
         monitor.show_pq()
-
+    #gets most crit lgu
     if args.cget:        
         most = monitor.get_most_critical_LGU()
         if most is None:
@@ -36,21 +42,9 @@ def main():
         else:
             print(f"Most critical LGU: {RED + BOLD + monitor.get_most_critical_LGU() + RESET}")
 
-    
-    monitor.supply_checker(args.lgu, curr_supply=args.curr, ideal_supply=args.ideal)
-    print(f"Added LGU: {args.lgu} (curr={args.curr}, ideal={args.ideal})")
-        
-    
-
-
-    monitor.supply_checker("Nueva Vizcaya", curr_supply=500, ideal_supply=100)
-    monitor.supply_checker("Cebu City", curr_supply=50, ideal_supply=200)
-    monitor.supply_checker("Benguet", curr_supply=300, ideal_supply=250)
 
     #prints the current standing of priority list
     monitor.show_pq()
-
-    print(f"Most critical LGU: {RED + BOLD + monitor.get_most_critical_LGU() + RESET}")
 
 if __name__ == "__main__":
     main()
