@@ -99,7 +99,6 @@ Examples:
 ### PQ Priority:
 - Largest positive -> biggest oversupply -> biggest priority
 - Most negative -> biggest shortage -> lowest priority (unless changed)
-- 
 
 ## Installation
 Clone the repository:
