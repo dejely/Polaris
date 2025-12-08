@@ -1,5 +1,11 @@
 from modules.dependency	import Entry, DLLNode
 
+RED = '\033[91m'
+GREEN = '\033[92m'
+YELLOW = '\033[93m'
+BOLD = '\033[1m'
+RESET = '\033[0m'
+
 class DLLPriorityQueue:
 	# DLL-based Priority Queue
 	def __init__(self):
@@ -15,10 +21,24 @@ class DLLPriorityQueue:
 		display = []
 		node = self.head_guard.get_next()
 		while node != self.tail_guard:
-			display.append(str(node.get_item()))
+			entry = node.get_item()
+			priority = -entry.key
+
+			value = entry.value
+
+			if isinstance(value, tuple) and len(value) == 2:
+				crop, lgu = value
+			else:
+				crop, lgu = value, "Unknown" #set unknown if crop is not known
+
+			line = f"<LGU: {GREEN + BOLD + lgu + RESET}| Crop: {BOLD + crop} | Priority: {YELLOW + BOLD}{priority}{RESET}>"
+			display.append(line)
 			node = node.get_next()
+			
+
+
 		display = ', '.join(display)
-		display = '[' + display + ']'
+		display = '{' + display + '}'
 		return display
 
 	def is_empty(self):
@@ -119,11 +139,28 @@ class SortedPQ(DLLPriorityQueue):
 
 		self.size += 1
 
-	def extract_max(self):
-		pass
+	#new update
+	def remove_lgu(self, value):
+		node = self.head_guard.get_next()
 
 
+		while node != self.tail_guard:
+			entry = node.get_item()
+			lgu_value, crop_value = entry.value
 
+			if lgu_value == value and crop_value == value: #tuple auto finds itself?
+				#Unlinking
+				prev = node.get_prev()
+				next = node.get_next()
+				prev.set_next(next)
+				next.set_prev(prev)
+
+				node.set_next(None)
+				node.set_prev(None)
+
+				self.size -= 1
+				return
+			node = node.get_next()
 
 	def remove_min(self):
 		if self.is_empty():
