@@ -18,7 +18,7 @@ class DLLPriorityQueue:
 			display.append(str(node.get_item()))
 			node = node.get_next()
 		display = ', '.join(display)
-		display = '{' + display + '}'
+		display = '[' + display + ']'
 		return display
 
 	def is_empty(self):

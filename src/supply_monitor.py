@@ -26,5 +26,8 @@ class SupplyMonitor:
         if self._pq.is_empty():
             return None
         return self.remove_max() #removes highest priority
+    
+    def show_pq(self):
+        print(self._pq)
 
 
