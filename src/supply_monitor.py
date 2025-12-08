@@ -27,9 +27,10 @@ class SupplyMonitor:
         _comm0 = """
                 CREATE TABLE IF NOT EXISTS
                 entries(
-                _lgu TEXT UNIQUE,
+                _lgu TEXT,
                 crop TEXT,
-                key INTEGER
+                key INTEGER,
+                UNIQUE(_lgu, crop)
                 )
                 """
         cur.execute(_comm0)
@@ -116,6 +117,6 @@ class SupplyMonitor:
         print("\nDatabase Records:")
         for row in summary:
             lgu, crop, key = row
-            print(f"LGU: {GREEN + BOLD + lgu + RESET}, Crop: {BOLD + crop}, Priority: {YELLOW}{-key}{RESET}")  # invert key for display
+            print(f"LGU: {GREEN + BOLD + lgu + RESET}, Crop: {BOLD + crop + RESET}, Priority: {YELLOW}{-key}{RESET}")  # invert key for display
 
         return summary

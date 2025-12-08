@@ -31,7 +31,7 @@ def main():
             print("Error: Please Complete the format -> --lgu [lgu] --crop [crop] --curr_supply[int] --ideal_supply[int]")
             return
         monitor.supply_checker(args.lgu, args.crop, args.curr, args.ideal)
-        print(f"Added {RED + BOLD + args.lgu + RESET} successfully.")
+        print(f"Added {RED + BOLD + args.lgu + RESET} with Crop {BOLD + args.crop + RESET} successfully.")
 
 
         
