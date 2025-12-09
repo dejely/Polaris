@@ -21,6 +21,7 @@ class SupplyMonitor:
         self.crops = {}
         self.load_db()
         
+        
     def setup_db(self):
         connection = sqlite3.connect(self.db_name)
         connection.close()
@@ -46,7 +47,6 @@ class SupplyMonitor:
         connection = sqlite3.connect(self.db_name)
         cur = connection.cursor()
        
-
         cur.execute("""
         SELECT name FROM sqlite_master 
         WHERE type='table' AND name NOT LIKE 'sqlite_%';
@@ -68,19 +68,16 @@ class SupplyMonitor:
 
         for table in tables:
             crop = table.capitalize()
-    
-        ###
-        ### LOAD FROM DB 
 
+        ### LOAD FROM DB 
             if crop not in self.crops:
                 self.crops[crop] = SortedPQ()
 
             cur.execute(f"SELECT _lgu, key FROM {table}")
 
             for _lgu, key in cur.fetchall():
-                self.crops[crop].insert(key, _lgu)
-        ###
-        ###
+                self.crops[crop].insert(key, (_lgu, crop))
+            
         connection.close()
 
     def supply_checker(self, _lgu, crop, curr_supply, ideal_supply):
@@ -102,7 +99,6 @@ class SupplyMonitor:
                 """
 
         cur.execute(_comm0, (_lgu, key))
-
         connection.commit()
         connection.close()
 
@@ -110,10 +106,10 @@ class SupplyMonitor:
             self.crops[crop] = SortedPQ()
 
         #LGU UPDATE/DUPLICATE
-        self._pq.remove_from_pq(crop, _lgu)
+       
 
         #set this as basis of your Priority Queue 
-        self.crops[crop].insert(key, _lgu) #PQ ENTRY REPRESENTS: (<LGU>, <CROP>)
+        self.crops[crop].insert(key, (_lgu, crop)) #PQ ENTRY REPRESENTS: (<LGU>, <CROP>)
 
     def remove_max(self):
         return self._pq.remove_min()
@@ -151,8 +147,37 @@ class SupplyMonitor:
             print(f"\nTable: {crop}")
 
             cur.execute(f"SELECT _lgu, key FROM {table}") #find on crop tablee
+            
             for lgu, key in cur.fetchall():
                 print(f"  LGU: {GREEN}{lgu}{RESET} | Priority: {YELLOW}{key}{RESET}")
 
         conn.close()
 
+    def match_supply(self, crop):
+        # Defensive validation
+        if not crop:
+            print("Error: No crop name provided.")
+            return None
+
+        crop = crop.capitalize()
+
+        pq = self.crops.get(crop)
+        if not pq or pq.size < 2:
+            print(f"Not enough LGUs to match for crop '{crop}'.")
+            return None
+
+        # Convert PQ to list of dicts
+        entries = pq.to_object()
+
+        # Shortage = most negative priority → index 0
+        shortage = entries[0]
+
+        # Oversupply = most positive priority → index -1
+        oversupply = entries[-1]
+
+        # Avoid matching the same LGU
+        if shortage["lgu"] == oversupply["lgu"]:
+            print("Cannot match: Only one LGU present.")
+            return None
+
+        return shortage, oversupply

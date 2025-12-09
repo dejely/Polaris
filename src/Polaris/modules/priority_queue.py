@@ -25,8 +25,8 @@ class DLLPriorityQueue:
 			priority = -entry.key
 
 			value = entry.value
-
-			line = f"<LGU: {GREEN + BOLD + value + RESET}| Priority: {YELLOW + BOLD}{priority}{RESET}>"
+			lgu, crop = value
+			line = f"<LGU: {GREEN + BOLD + lgu + RESET}| Priority: {YELLOW + BOLD}{priority}{RESET}>"
 			display.append(line)
 			node = node.get_next()
 			
@@ -38,6 +38,25 @@ class DLLPriorityQueue:
 
 	def is_empty(self):
 		return self.size == 0
+	
+	def to_object(self):
+		result = []
+		node = self.head_guard.get_next()
+
+		while node != self.tail_guard:
+			key = node.get_item().key
+			value = node.get_item().value
+
+			if isinstance(value, tuple) and len(value) == 2:
+				lgu, crop = value
+			else:
+				lgu, crop = value, "Unkown"
+
+			result.append({"priority": -key, "lgu": lgu, "crop": crop})
+
+			node = node.get_next()
+
+		return result
 
 class UnsortedPQ(DLLPriorityQueue):
 	# Unsorted DLL-based Priority Queue

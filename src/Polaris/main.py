@@ -1,9 +1,10 @@
 from supply_monitor import SupplyMonitor 
 import argparse as ap
 RED = '\033[91m'
-RESET = '\033[0m'
+GREEN = '\033[92m'
+YELLOW = '\033[93m'
 BOLD = '\033[1m'
-
+RESET = '\033[0m'
 
 
 def main():
@@ -15,6 +16,7 @@ def main():
     parser.add_argument('--cget', help="Get the most critical LGU", action="store_true")
     parser.add_argument('--list', help="List all the LGUs and Status", action="store_true")
     parser.add_argument('--flush', help="Fully resets your database", choices= ['true', 'false'])
+    parser.add_argument('--match', help="Matches Oversupply to Undersupply", action="store_true")
     
 
     #args for adding a LGU
@@ -32,6 +34,22 @@ def main():
             return
         monitor.supply_checker(args.lgu, args.crop, args.curr, args.ideal)
         print(f"Added {RED + BOLD + args.lgu + RESET} with Crop {BOLD + args.crop + RESET} successfully.")
+        
+    if args.match:
+        if not args.crop:
+            print("Error: --match requires --crop <CropName>")
+            return
+        result = monitor.match_supply(args.crop)
+
+        Oversupply, Shortage = result
+
+        print(f"--- MATCH RESULTS FOR {args.crop.capitalize()} ---")
+        print(f"Oversupply: {BOLD}{Oversupply['lgu'] + RESET} ({RED}{Oversupply['priority']}{RESET})")
+        print(f"Shortage: {BOLD}{Shortage['lgu'] + RESET} ({RED}{Shortage['priority']}{RESET})")
+
+        print(f"\nRecommendation: ")
+        print(f"Transfer {args.crop.capitalize()} from"
+              f" {GREEN}{Oversupply['lgu']}{RESET} -> {RED}{Shortage['lgu']}{RESET}")
 
 
         
@@ -39,6 +57,7 @@ def main():
     if args.list:
         
         monitor.show_pq()
+        
     #gets most crit lgu
     if args.cget:        
         
@@ -53,6 +72,5 @@ def main():
         monitor.flush_db()
 
 
-    #prints the current standing of priority list
 if __name__ == "__main__":
     main()
