@@ -106,6 +106,12 @@ Clone the repository:
 git clone https://github.com/dejely/Polaris.git
 cd src
 ```
+
+or
+
+```bash
+pip install Polaris
+```
 No Dependencies Needed.
 
 ## Usage
