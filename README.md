@@ -1,7 +1,7 @@
 # 🌟Polaris
 **_A Structured Redistribution Engine for Crop Supply Monitoring and Agricultural Logistics_**
 ## 📖 Overview
-POLARIS is an agricultural logistics system built to monitor the supply conditions of various crops across Local Government Units (LGUs).
+POLARIS a Domain-specific supply-balancing framework is an agricultural logistics system built to monitor the supply conditions of various crops across Local Government Units (LGUs).
 
 It uses:
 - **Signed priority values** (key > 0 = Oversupply | key < 0 = Undersupply)
