@@ -421,4 +421,5 @@ FodyWeavers.xsd
 src/entries.db
 *.db
 *.txt
+src/agriPolaris.egg-info/*
 
