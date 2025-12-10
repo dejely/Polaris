@@ -1,4 +1,4 @@
-from supply_monitor import SupplyMonitor 
+from .supply_monitor import SupplyMonitor 
 import argparse as ap
 RED = '\033[91m'
 GREEN = '\033[92m'
@@ -41,7 +41,7 @@ def main():
             return
         result = monitor.match_supply(args.crop)
 
-        Oversupply, Shortage = result
+        Oversupply, Shortage = result # tupple
 
         print(f"--- MATCH RESULTS FOR {args.crop.capitalize()} ---")
         print(f"Oversupply: {BOLD}{Oversupply['lgu'] + RESET} ({RED}{Oversupply['priority']}{RESET})")

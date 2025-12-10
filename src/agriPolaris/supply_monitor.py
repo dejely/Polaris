@@ -1,12 +1,10 @@
-from modules.priority_queue import SortedPQ, UnsortedPQ
+from   .modules.priority_queue import SortedPQ, UnsortedPQ
 import sqlite3
 RED = '\033[91m'
 GREEN = '\033[92m'
 YELLOW = '\033[93m'
 BOLD = '\033[1m'
 RESET = '\033[0m'
-
-
 
 class SupplyMonitor:
     def __init__(self, use_sorted = True):
@@ -149,7 +147,7 @@ class SupplyMonitor:
             cur.execute(f"SELECT _lgu, key FROM {table}") #find on crop tablee
             
             for lgu, key in cur.fetchall():
-                print(f"  LGU: {GREEN}{lgu}{RESET} | Priority: {YELLOW}{key}{RESET}")
+                print(f"  LGU: {GREEN}{lgu}{RESET} | Priority: {YELLOW}{-key}{RESET}")
 
         conn.close()
 

@@ -1,23 +1,30 @@
 [build-system]
-requires = ["setuptools>=61.0"]
+requires = ["setuptools>=64", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "polaris-supply"
+name = "agriPolaris"
 version = "0.1.0"
 description = "A priority-queue-driven crop supply monitoring engine."
-authors = [
-    {name="Your Name", email="you@example.com"}
-]
 readme = "README.md"
-requires-python = ">=3.9"
-license = {text="MIT"}
+requires-python = ">=3.11"
+license = { text = "MIT" }
 
-dependencies = [
-    "sqlite3",     # optional if using builtin sqlite module
+authors = [
+    { name = "Dejel Cyrus De Asis", email = "deasisdejel08@gmail.com" }
 ]
+
+dependencies = []
 
 [project.urls]
 Homepage = "https://github.com/dejely/polaris"
 Documentation = "https://github.com/dejely/polaris"
 Source = "https://github.com/dejely/polaris"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+
+
+[tool.setuptools.packages.find]
+where = ["src"]
