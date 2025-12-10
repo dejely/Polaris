@@ -107,7 +107,7 @@ class SupplyMonitor:
        
 
         #set this as basis of your Priority Queue 
-        self.crops[crop].insert(key, (_lgu, crop)) #PQ ENTRY REPRESENTS: (<LGU>, <CROP>)
+        return self.crops[crop].insert(key, (_lgu, crop)) #PQ ENTRY REPRESENTS: (<LGU>, <CROP>)
 
     def remove_max(self):
         return self._pq.remove_min()
@@ -115,7 +115,7 @@ class SupplyMonitor:
     def get_most_critical_LGU(self):
         if self._pq.is_empty():
             return None
-        return self.remove_max() #removes highest priority
+        return self._pq.head_guard.get_next()
     
     def show_pq(self):
         print("\n=== Priority Queues by Crop ===")
