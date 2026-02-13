@@ -1,181 +1,96 @@
-from   .modules.priority_queue import SortedPQ, UnsortedPQ
-import sqlite3
-RED = '\033[91m'
-GREEN = '\033[92m'
-YELLOW = '\033[93m'
-BOLD = '\033[1m'
-RESET = '\033[0m'
+from __future__ import annotations
+
+from agriPolaris.application.service import SupplyMonitorService
+from agriPolaris.infrastructure.sqlite_repository import SQLiteSupplyRepository
+
+RED = "\033[91m"
+GREEN = "\033[92m"
+YELLOW = "\033[93m"
+BOLD = "\033[1m"
+RESET = "\033[0m"
+
 
 class SupplyMonitor:
-    def __init__(self, use_sorted = True):
-        
-        self.db_name = "entries.db"
-        if use_sorted:
-            self._pq = SortedPQ()
-        else:
-            self._pq = UnsortedPQ()
-         #use sorted PQ or Unsorted
-        self.setup_db()
-        self.crops = {}
-        self.load_db()
-        
-        
-    def setup_db(self):
-        connection = sqlite3.connect(self.db_name)
-        connection.close()
+    """Backward-compatible facade over the new service architecture."""
 
-    def create_crop_table(self, crop):
-        table = crop.lower()
-        #setup a new table for a new type of crop
-        connection = sqlite3.connect(self.db_name)
-        cur = connection.cursor()
+    def __init__(self, use_sorted: bool = True, db_name: str = "entries.db") -> None:
+        del use_sorted
+        self.db_name = db_name
+        self._service = SupplyMonitorService(SQLiteSupplyRepository(db_path=self.db_name))
 
-        _comm0 = f"""
-                CREATE TABLE IF NOT EXISTS {table}(
-                _lgu TEXT UNIQUE,
-                key INTEGER
-                );
-                """
-        cur.execute(_comm0)
+    def setup_db(self) -> None:
+        self._service = SupplyMonitorService(SQLiteSupplyRepository(db_path=self.db_name))
 
-        connection.commit()
-        connection.close()
+    def create_crop_table(self, crop: str) -> None:
+        # No-op in normalized schema. Kept for backward compatibility.
+        del crop
 
-    def flush_db(self):
-        connection = sqlite3.connect(self.db_name)
-        cur = connection.cursor()
-       
-        cur.execute("""
-        SELECT name FROM sqlite_master 
-        WHERE type='table' AND name NOT LIKE 'sqlite_%';
-        """)
-        tables = [t[0] for t in cur.fetchall()]
-        for table in tables:
-            cur.execute(f"DELETE FROM {table}")
-        
-        connection.commit()
-        connection.execute("VACUUM")
-        connection.close()
-        self.crops = {} #reset in memory
+    def flush_db(self) -> None:
+        self._service.flush()
 
-    def load_db(self):
-        connection = sqlite3.connect(self.db_name)
-        cur = connection.cursor()
-        cur.execute("SELECT name FROM sqlite_master WHERE type='table'") #get all tables from DB
-        tables = [t[0] for t in cur.fetchall()]
+    def load_db(self) -> None:
+        self._service = SupplyMonitorService(SQLiteSupplyRepository(db_path=self.db_name))
 
-        for table in tables:
-            crop = table.capitalize()
-
-        ### LOAD FROM DB 
-            if crop not in self.crops:
-                self.crops[crop] = SortedPQ()
-
-            cur.execute(f"SELECT _lgu, key FROM {table}")
-
-            for _lgu, key in cur.fetchall():
-                self.crops[crop].insert(key, (_lgu, crop))
-            
-        connection.close()
-
-    def supply_checker(self, _lgu, crop, curr_supply, ideal_supply):
-        #validation catch
-        if crop is None or crop.strip() == "":
-            raise ValueError("Crop cannot be empty. Use --crop <name>.")
-        
-        self.create_crop_table(crop)
-        connection = sqlite3.connect(self.db_name)
-        cur = connection.cursor()
-        table = crop.lower()
-
-        imbalance = curr_supply - ideal_supply #Trun min-heap to max-heap PQ
-        key = -imbalance
-
-        _comm0 = f"""
-                INSERT OR REPLACE INTO {table}(_lgu, key)
-                VALUES(?, ?)
-                """
-
-        cur.execute(_comm0, (_lgu, key))
-        connection.commit()
-        connection.close()
-
-        if crop not in self.crops:
-            self.crops[crop] = SortedPQ()
-
-        #LGU UPDATE/DUPLICATE
-       
-
-        #set this as basis of your Priority Queue 
-        return self.crops[crop].insert(key, (_lgu, crop)) #PQ ENTRY REPRESENTS: (<LGU>, <CROP>)
+    def supply_checker(self, _lgu: str, crop: str, curr_supply: int, ideal_supply: int):
+        return self._service.upsert_supply(
+            lgu=_lgu,
+            crop=crop,
+            current_supply=curr_supply,
+            ideal_supply=ideal_supply,
+        )
 
     def remove_max(self):
-        return self._pq.remove_min()
+        critical = self._service.get_most_critical()
+        if not critical:
+            return None
+        return critical.lgu, critical.crop, critical.priority
 
     def get_most_critical_LGU(self):
-        if self._pq.is_empty():
+        critical = self._service.get_most_critical()
+        if not critical:
             return None
-        return self._pq.head_guard.get_next()
-    
-    def show_pq(self):
+        return critical.lgu
+
+    def show_pq(self) -> None:
         print("\n=== Priority Queues by Crop ===")
+        all_supply = self._service.list_supply()
+        if not all_supply:
+            print("No records found.")
+            return
 
-        # Print in-memory PQs
-        for crop, pq in self.crops.items():
-            if crop is None:
-                continue
-
+        for crop, states in all_supply.items():
             print(f"\nCrop: {YELLOW}{crop}{RESET}")
-            print(pq)
+            for state in states:
+                print(
+                    f"  LGU: {GREEN}{state.lgu}{RESET} | "
+                    f"Priority: {YELLOW}{state.priority}{RESET} | "
+                    f"Status: {state.status}"
+                )
 
-        # Print DB records
-        print("\n=== Database Records ===")
-
-        conn = sqlite3.connect(self.db_name)
-        cur = conn.cursor()
-
-        cur.execute("SELECT name FROM sqlite_master WHERE type='table'")
-        tables = [t[0] for t in cur.fetchall()]
-
-        for table in tables:
-            if table.startswith("sqlite_"):
-                continue
-
-            crop = table.capitalize()
-            print(f"\nTable: {crop}")
-
-            cur.execute(f"SELECT _lgu, key FROM {table}") #find on crop tablee
-            
-            for lgu, key in cur.fetchall():
-                print(f"  LGU: {GREEN}{lgu}{RESET} | Priority: {YELLOW}{-key}{RESET}")
-
-        conn.close()
-
-    def match_supply(self, crop):
-        # Defensive validation
-        if not crop:
-            print("Error: No crop name provided.")
+    def match_supply(self, crop: str):
+        result = self._service.match_supply(crop)
+        if not result:
             return None
 
-        crop = crop.capitalize()
+        oversupply = {
+            "lgu": result.oversupply.lgu,
+            "crop": result.oversupply.crop,
+            "priority": result.oversupply.priority,
+        }
+        shortage = {
+            "lgu": result.shortage.lgu,
+            "crop": result.shortage.crop,
+            "priority": result.shortage.priority,
+        }
 
-        pq = self.crops.get(crop)
-        if not pq or pq.size < 2:
-            print(f"Not enough LGUs to match for crop '{crop}'.")
-            return None
+        return oversupply, shortage
 
-        # Convert PQ to list of dicts
-        entries = pq.to_object()
-
-        # Shortage = most negative priority → index 0
-        shortage = entries[0]
-
-        # Oversupply = most positive priority → index -1
-        oversupply = entries[-1]
-
-        # Avoid matching the same LGU
-        if shortage["lgu"] == oversupply["lgu"]:
-            print("Cannot match: Only one LGU present.")
-            return None
-
-        return shortage, oversupply
+    @property
+    def crops(self) -> dict[str, list[dict[str, object]]]:
+        return {
+            crop: [
+                {"lgu": state.lgu, "crop": state.crop, "priority": state.priority}
+                for state in states
+            ]
+            for crop, states in self._service.list_supply().items()
+        }
